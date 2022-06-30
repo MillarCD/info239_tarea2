@@ -45,8 +45,7 @@ def sendMsg(msg):
         msgFromServer = UDPClientSocket.recvfrom(bufferSize)
         res = msgFromServer[0].decode()
     except TimeoutError:
-        print('TimeoutError')
-        res = 'NAK'
+        res = 'TimeoutError'
     return res
 
 # MAIN()
