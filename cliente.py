@@ -3,15 +3,38 @@ import socket
 msgFromClient       ="name_1"
 serverAddressPort   = ("127.0.0.1", 20001)
 bufferSize          = 1024
-timeout             = 3
+timeout             = 3 # segundos
 
 # transforma el caracter en una string de 0s y 1s
-def binaryTransformation(caracter):
-    return caracter
+def binaryTranslate( char ):
+    asciiChar = ord(char)
+    binChar = bin(asciiChar)
+    return f'{"0"*( 8%len(binChar[2:]) )}{binChar[2:]}' # añade los ceros restantes para tener largo 8
 
 # aplica mecanismo CRC al mensaje
-def CRC(msg):
-    return msg
+def CRC( msg ):
+    gx = '1011' # <- polinimio generador x^3 + x + 1
+    r = '000'
+    
+    crcMsg = f'{msg}{r}'
+    
+    # DIVISION
+    index = len(r)+1
+    resto = crcMsg[:len(r)+1]
+    while ( index <= len(crcMsg) ):        
+        if resto[0]=='0':
+            if index<len(crcMsg):
+                resto = resto[1:]+crcMsg[index]
+            index +=1
+            pass
+        else:
+            newResto = ''
+            for resto_i, gx_i in zip(resto, gx):
+                newResto += str( int(resto_i) ^ int(gx_i) )
+
+            resto = newResto
+            
+    return f'{msg}{resto[1:]}'
 
 # envia el mensaje al servidor mediante conexion UDP
 # retorna ACK si la comunicacion fue exitosa y NAK si hubo perdida
@@ -36,7 +59,7 @@ UDPClientSocket.settimeout(timeout)
 print("Intentando enviar")
 index = 0;
 while index<len(msgFromClient):
-    binaryMsg = binaryTransformation(msgFromClient[index])
+    binaryMsg = binaryTranslate(msgFromClient[index])
     # se le agrega un bit para manejo de duplicado
     crcMsg = CRC(f'{binaryMsg}{index%2}') 
     res = sendMsg(crcMsg)
