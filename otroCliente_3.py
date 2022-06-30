@@ -1,6 +1,6 @@
 import socket
 
-msgFromClient       ="xyz u"
+msgFromClient       ="1234"
 serverAddressPort   = ("127.0.0.1", 20001)
 bufferSize          = 1024
 timeout             = 3 # segundos

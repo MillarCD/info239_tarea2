@@ -5,7 +5,7 @@ import random
 localIP     = "127.0.0.1"
 localPort   = 20001
 bufferSize  = 1024
-rangeSleep = range(1,5) # <-- cambiar al finalizar el trabajo
+rangeSleep = range(2,5) # <-- cambiar al finalizar el trabajo
 perdida = 0.3
 timeout = 5
 names = {}
@@ -64,31 +64,35 @@ while(True):
         # validar si el cliente existe o crear uno
         if (names.get(clientPort)==None):
             names = insertNewPort( names, clientPort )
-        print(names)
+        
 
         print("Link bussy")
 
 
         # Probabilidad de perdida
         if (random.random()<=perdida):
+            print('hubo perdida')
             bytesToSend = str.encode('NAK')
+
         else:
-            bytesToSend = str.encode('ACK') 
-            
             # se decodifica el mensaje y se guarda en names
             binMsg, bitMD = CRC_decode(message.decode())
             msg = decodeMsg( binMsg )
 
+            print(f'char: {msg}')
+
             clientData = names.get(clientPort)
             # comprueba si el mensaje ya ha sido procesado
             # con el bit de manejo de duplicidad
-            print('bitMD ', bitMD)
-            print('clienteData bitMD ', clientData.get('bitMD'))
+            lastBitMD = bitMD
             if ( bitMD != clientData.get('bitMD') ):
-                print('entro al if')
                 names.update({ 
                     clientPort: updateData( clientData, msg )
                 })
+                lastBitMD = bitMD ^ 1
+            bytesToSend = str.encode(f'{lastBitMD}-ACK') 
+            
+            print(f'name: {names.get(clientPort).get("name")}')
 
 
         # Tiempo de retardo
@@ -97,6 +101,7 @@ while(True):
         time.sleep(sleep)
             
         # Sending a reply to client
+        print(f'bytesTosend: {bytesToSend}')
         UDPServerSocket.sendto(bytesToSend, address)
         print()
         print("Link Available")

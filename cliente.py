@@ -1,6 +1,6 @@
 import socket
 
-msgFromClient       ="name_1"
+msgFromClient       ="name"
 serverAddressPort   = ("127.0.0.1", 20001)
 bufferSize          = 1024
 timeout             = 3 # segundos
@@ -9,7 +9,8 @@ timeout             = 3 # segundos
 def binaryTranslate( char ):
     asciiChar = ord(char)
     binChar = bin(asciiChar)
-    return f'{"0"*( 8%len(binChar[2:]) )}{binChar[2:]}' # añade los ceros restantes para tener largo 8
+    # añade los ceros restantes para tener largo 8
+    return f'{"0"*( 8%len(binChar[2:]) )}{binChar[2:]}' 
 
 # aplica mecanismo CRC al mensaje
 def CRC( msg ):
@@ -62,7 +63,9 @@ while index<len(msgFromClient):
     # se le agrega un bit para manejo de duplicado
     crcMsg = CRC(f'{binaryMsg}{index%2}') 
     res = sendMsg(crcMsg)
+
     print(f"Message from Server {res}, character: {msgFromClient[index]}")
-    if (res == 'ACK'):
+    print()
+    # asegura que la respuesta sea exitosa y para el msg correspondiente
+    if (res[2:] == 'ACK' and int(res[0])!={index%2}):
         index += 1
- 
