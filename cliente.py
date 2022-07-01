@@ -6,14 +6,14 @@ bufferSize          = 1024
 timeout             = 3 # segundos
 
 # transforma el caracter en una string de 0s y 1s
-def binaryTranslate( char ):
+def binaryTranslate( char: chr ) -> str:
     asciiChar = ord(char)
     binChar = bin(asciiChar)
     # añade los ceros restantes para tener largo 8
     return f'{"0"*( 8%len(binChar[2:]) )}{binChar[2:]}' 
 
 # aplica mecanismo CRC al mensaje
-def CRC( msg ):
+def CRC( msg: str ) -> str:
     gx = '1011' # <- polinimio generador x^3 + x + 1
     r = '000'
     
@@ -39,7 +39,7 @@ def CRC( msg ):
 
 # envia el mensaje al servidor mediante conexion UDP
 # retorna ACK si la comunicacion fue exitosa y NAK si hubo perdida
-def sendMsg(msg):
+def sendMsg( msg: str ) -> str:
     bytesToSend         = str.encode(msg)
     UDPClientSocket.sendto(bytesToSend, serverAddressPort)
     try:

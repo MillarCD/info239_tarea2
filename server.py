@@ -12,15 +12,15 @@ names = {}
 
 # Quita los bits que añade CRC y retorna el mensaje en binario
 # mas el bit para manejo de duplicidad
-def CRC_decode( CRCMsg ):
+def CRC_decode( CRCMsg: str ) -> tuple:
     r = 3
     msg_bitMD = CRCMsg[:-r]
     return msg_bitMD[:-1], int(msg_bitMD[-1])
 
-def decodeMsg( binMessage ):
+def decodeMsg( binMessage: str ) -> chr:
     return chr(int(binMessage,2)) 
 
-def insertNewPort( diccPorts, newPort ):
+def insertNewPort( diccPorts: dict, newPort: int ) -> dict:
     newDiccPorts = diccPorts.copy()
 
     newDiccPorts.update( {
@@ -32,7 +32,7 @@ def insertNewPort( diccPorts, newPort ):
 
     return newDiccPorts
 
-def updateData( data, c ):
+def updateData( data: dict, c: chr ) -> dict:
     newData = data.copy()
 
     newData['name'] += c
