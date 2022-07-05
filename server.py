@@ -5,7 +5,7 @@ import random
 localIP     = "127.0.0.1"
 localPort   = 20001
 bufferSize  = 1024
-rangeSleep = range(2,5) # <-- cambiar al finalizar el trabajo
+rangeSleep = range(500,3000) # tiempo en mseg 
 perdida = 0.3
 timeout = 5
 names = {}
@@ -20,7 +20,7 @@ def CRC_decode( CRCMsg: str ) -> tuple:
 def decodeMsg( binMessage: str ) -> chr:
     return chr(int(binMessage,2)) 
 
-def insertNewPort( diccPorts: dict, newPort: int ) -> dict:
+def insertNewClient( diccPorts: dict, newPort: int ) -> dict:
     newDiccPorts = diccPorts.copy()
 
     newDiccPorts.update( {
@@ -63,7 +63,7 @@ while(True):
 
         # validar si el cliente existe o crear uno
         if (names.get(clientPort)==None):
-            names = insertNewPort( names, clientPort )
+            names = insertNewClient( names, clientPort )
         
 
         print("Link bussy")
@@ -89,14 +89,16 @@ while(True):
                 names.update({ 
                     clientPort: updateData( clientData, msg )
                 })
-                lastBitMD = bitMD ^ 1
+                print('bitMD: ', bitMD)
+
+            print('lastBitMD: ', lastBitMD)
             bytesToSend = str.encode(f'{lastBitMD}-ACK') 
             
             print(f'name: {names.get(clientPort).get("name")}')
 
 
         # Tiempo de retardo
-        sleep = random.choice(rangeSleep)
+        sleep = (random.choice(rangeSleep)) / 1000
         print(f'sleep: {sleep}')
         time.sleep(sleep)
             
