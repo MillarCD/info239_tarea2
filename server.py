@@ -1,6 +1,7 @@
 import socket
 import time
 import random
+from utils import CRC_decode, decodeMsg
 
 localIP     = "127.0.0.1"
 localPort   = 20001
@@ -9,16 +10,6 @@ rangeSleep = range(500,3000) # tiempo en mseg
 perdida = 0.3
 timeout = 5
 names = {}
-
-# Quita los bits que añade CRC y retorna el mensaje en binario
-# mas el bit para manejo de duplicidad
-def CRC_decode( CRCMsg: str ) -> tuple:
-    r = 3
-    msg_bitMD = CRCMsg[:-r]
-    return msg_bitMD[:-1], int(msg_bitMD[-1])
-
-def decodeMsg( binMessage: str ) -> chr:
-    return chr(int(binMessage,2)) 
 
 def insertNewClient( diccPorts: dict, newPort: int ) -> dict:
     newDiccPorts = diccPorts.copy()
@@ -59,42 +50,40 @@ while(True):
         [ message, address ] = bytesAddressPair
         _, clientPort = address
         
-        print(f'clientPort: {clientPort}, msg: {message.decode()}')
 
         # validar si el cliente existe o crear uno
         if (names.get(clientPort)==None):
             names = insertNewClient( names, clientPort )
         
-
-        print("Link bussy")
-
+        print(f"Link bussy, client: {clientPort}")
 
         # Probabilidad de perdida
         if (random.random()<=perdida):
-            print('hubo perdida')
+            print(f'hubo perdida')
             bytesToSend = str.encode('NAK')
 
         else:
             # se decodifica el mensaje y se guarda en names
             binMsg, bitMD = CRC_decode(message.decode())
-            msg = decodeMsg( binMsg )
+            if( binMsg == None ):
+                bytesToSend = str.encode('NAK')
+            else:
+                msg = decodeMsg( binMsg )
 
-            print(f'char: {msg}')
+                print(f'char: {msg} ', end=' ')
 
-            clientData = names.get(clientPort)
-            # comprueba si el mensaje ya ha sido procesado
-            # con el bit de manejo de duplicidad
-            lastBitMD = bitMD
-            if ( bitMD != clientData.get('bitMD') ):
-                names.update({ 
-                    clientPort: updateData( clientData, msg )
-                })
-                print('bitMD: ', bitMD)
+                clientData = names.get(clientPort)
+                # comprueba si el mensaje ya ha sido procesado
+                # con el bit de manejo de duplicidad
+                lastBitMD = bitMD
+                if ( bitMD != clientData.get('bitMD') ):
+                    names.update({ 
+                        clientPort: updateData( clientData, msg )
+                    })
 
-            print('lastBitMD: ', lastBitMD)
-            bytesToSend = str.encode(f'{lastBitMD}-ACK') 
+                bytesToSend = str.encode(f'{lastBitMD}-ACK') 
             
-            print(f'name: {names.get(clientPort).get("name")}')
+                print(f'name: {names.get(clientPort).get("name")}')
 
 
         # Tiempo de retardo
@@ -106,7 +95,6 @@ while(True):
         print(f'bytesTosend: {bytesToSend}')
         UDPServerSocket.sendto(bytesToSend, address)
         print()
-        print("Link Available")
 
     except TimeoutError:
         print("Tiempo de espera agotado\nNombres:")
