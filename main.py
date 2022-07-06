@@ -34,7 +34,7 @@ while index<len(msgFromClient):
     crcMsg = CRC(f'{binaryMsg}{index%2}') 
     res = sendMsg(crcMsg)
 
-    print(f"Message from Server {res}, character: {msgFromClient[index]}, bitMD: {index%2}")
+    print(f"character: {msgFromClient[index]}, bitMD: {index%2}. Message from Server {res}")
     print()
     # asegura que la respuesta sea exitosa y para el msg correspondiente
     if (res[2:] == 'ACK' and int(res[0])==index%2):
